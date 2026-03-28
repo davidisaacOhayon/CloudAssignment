@@ -1,0 +1,5 @@
+services:
+  frontend:
+    build: .   # points to Dockerfile
+    ports:
+      - "3001:3000"

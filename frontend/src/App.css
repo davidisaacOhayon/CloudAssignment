@@ -1,0 +1,24 @@
+*{
+  margin: 0px;
+  padding: 0px;
+}
+
+.main-content{
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+.ui-btn{
+  width: 120px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  height: 50px;
+  border-radius: 20px;
+  border: 2px rgba(62, 62, 62, 0.578) solid;
+  background-color: white;
+  cursor: pointer;
+}

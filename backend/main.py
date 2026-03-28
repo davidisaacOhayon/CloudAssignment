@@ -14,23 +14,26 @@ class NumberRequest(BaseModel):
 
 app = FastAPI()
 
-results = {
-    "numbers": [],
-    "instance_id" : os.environ.get("GAE_INSTANCE", "local"),
-    "version" : os.environ.get("GAE_VERSION", "v1"),
-}
+ 
 
 
  
-@app.post("/generate/")
-async def generate(batched: bool = False):
-    if batched:
-        batch = 5 
-        results["numbers"].extend([random.randint(0, 10000) for x in range(0, batch)]) 
-    else:
-        results["numbers"].append(random.randint(0, 10000))
+@app.get("/generate/")
+async def generate(batched: bool = False, batch_size: int = 1):
+    
 
-    return results
+    response = {
+        "numbers": [],
+        "instance_id" : os.environ.get("GAE_INSTANCE", "local"),
+        "version" : os.environ.get("GAE_VERSION", "v1"),
+    }
+    if batched:
+        for _ in range(0, batch_size):
+          response["numbers"].extend([random.randint(0, 10000) for x in range(0, 100000)]) 
+    else:
+        response["numbers"].append(random.randint(0, 100000))
+
+    return response
 
 @app.get("/results/")
 async def results():

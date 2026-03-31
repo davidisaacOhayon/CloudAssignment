@@ -22,19 +22,13 @@ origins = [
     "https://backend-dot-davidassignment.nw.r.appspot.com"
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],  # allow all methods
-    allow_headers=["*"],  # allow all headers
-)
+
 load_dotenv()
 
 
  
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?unix_socket=/cloudsql/{DB_CONN_STRING}"
- branch
+
  
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
@@ -56,6 +50,16 @@ class Entry(SQLModel, table=True):
 
 # --- APP ---
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # allow all methods
+    allow_headers=["*"],  # allow all headers
+)
+
 
 @app.on_event("startup")
 def on_startup():

@@ -1,76 +1,67 @@
 import axios from 'axios';
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
-
-
-
-
-export default function Table(){
-
-
-
+export default function Table() {
     const [data, setData] = useState(null);
+    const [stats, setStats] = useState(null);
 
-    useEffect(() => { 
-
+    useEffect(() => {
         const sendGenerateRequest = async () => {
-            await axios.get("/generate/");    
-        }
+            await axios.get("/generate/");
+        };
 
         const getResults = async () => {
             const res = await axios.get("https://backend-dot-davidassignment.nw.r.appspot.com/results/");
             const data = res.data;
-            console.log(`Retrieved data ${data}`)
-            setData(data);
-        }
+            setData(data.distribution);
+            setStats({
+                smallest: data.smallest,
+                biggest: data.biggest
+            });
+        };
 
         sendGenerateRequest();
         getResults();
-
-    }, [])
-
+    }, []);
 
     const renderData = () => {
+        if (!data || !stats) return null;
 
-        if (data == null){
-            return;
-        }
-        return(
+        return (
             <table>
-                <th>
-                    <td>
-                        Instance 
-                    </td>
-                    <td>
-                        Instance Version
-                    </td>
-                    <td>
-                        Number Generated
-                    </td>
-                    <td>
-                        Largest Number
-                    </td>
-                    <td>
-                        Smallest Number
-                    </td>
-                </th>
-                {Object.entries(data).map(obj => { 
-                    return(
-                        <tr>
-                            <td>{obj["instance"]}</td>
-                            <td>{obj["version"]}</td>
-                            <td>{obj["number"]}</td>
-                            <td></td>
-                            <td></td>
+                <thead>
+                    <tr>
+                        <td>Instance</td>
+                        <td>Version</td>
+                        <td>Total Numbers</td>
+                        <td>Largest Number</td>
+                        <td>Smallest Number</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map((row, idx) => (
+                        <tr key={idx}>
+                            <td>{row.instance}</td>
+                            <td>{row.version}</td>
+                            <td>{row.total}</td>
+                            <td>{row.maximum}</td>
+                            <td>{row.minimum}</td>
                         </tr>
-
-                    )
-                })}
+                    ))}
+                </tbody>
             </table>
-        )
-    }
+        );
+    };
 
-    return(
-        data && renderData()
-    )
+    return (
+        <>
+            {stats && (
+                <div>
+                    <p>Global Largest: {stats.biggest.number} ({stats.biggest.instance})</p>
+                    <p>Global Smallest: {stats.smallest.number} ({stats.smallest.instance})</p>
+                </div>
+            )}
+            {data && renderData()}
+        </>
+    );
 }

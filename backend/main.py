@@ -3,11 +3,12 @@ from pydantic import BaseModel
 import random
 import os
 from typing import Annotated, List
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import Field, Session, SQLModel, create_engine, select, func
 from datetime import datetime
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
+load_dotenv()
 # --- ENV ---
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
@@ -19,14 +20,14 @@ DB_PORT = os.getenv("DB_PORT", "3306")
 
 # For CORS allowed origins, you may need to set this manually.
 origins = [
-    "https://backend-dot-davidassignment.nw.r.appspot.com"
+    "https://frontend-dot-davidassignment.nw.r.appspot.com"
 ]
 
 
-load_dotenv()
 
 
- 
+
+# SQL Connection string
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@/{DB_NAME}?unix_socket=/cloudsql/{DB_CONN_STRING}"
 
  
@@ -112,6 +113,23 @@ async def generate(
 # --- RESULTS ENDPOINT ---
 @app.get("/results/")
 async def results(session: SessionDep):
-    entries: List[Entry] = session.exec(select(Entry)).all()
+    query = select(Entry.instance, Entry.version, func.count(Entry.id), func.min(Entry.number), func.max(Entry.number)).group_by(Entry.instance, Entry.version)
+    entries: List[Entry] = session.exec(query).all()
+    stats = [{
+        "instance": inst,
+        "version": ver,
+        "total": count,
+        "minimum": mini,
+        "maximum": maxi
+    } for inst, ver, count, mini, maxi in entries]
 
-    return entries
+    smallest = session.exec(select(Entry.instance, Entry.number).order_by(Entry.number.asc())).first()
+    biggest  = session.exec(select(Entry.instance, Entry.number).order_by(Entry.number.desc())).first()
+
+    response = {
+        "distribution": stats,
+        "smallest": {"instance" : smallest[0], "number" : smallest[1]},
+        "biggest": {"instance" : biggest[0], "number" : biggest[1]}
+    }
+
+    return response

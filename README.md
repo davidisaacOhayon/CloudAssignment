@@ -29,6 +29,7 @@ DB_USER=backend
 DB_NAME=backend
 DB_PORT=3306
 ```
+Note that DB CONN STRING must be in the format ```[google-project-name]:[region]:[DB_Name]```
 # Front End Setup
 The Frontend can be setup by ```cd ./frontend``` and running 
 ```cmd

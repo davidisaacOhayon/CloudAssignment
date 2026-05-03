@@ -8,6 +8,9 @@ export default function Table() {
     // Skimmed data
     const [stats, setStats] = useState(null);
 
+    // Retrieve backend URL from .env
+    const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
     // Runs upon rendering
     useEffect(() => {
 
@@ -24,7 +27,7 @@ export default function Table() {
             fetching = true;
             try {
                 // Send request for results
-                const res = await axios.get("https://backend-dot-davidassignment.nw.r.appspot.com/results/");
+                const res = await axios.get(`${backendUrl}/results/`);
 
                 // Skim data
                 const data = res.data;

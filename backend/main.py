@@ -20,12 +20,13 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_CONN_STRING = os.getenv("DB_CONN_STRING")
 DB_NAME = os.getenv("DB_NAME")
 DB_PORT = os.getenv("DB_PORT", "3306")
- 
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+
 
 
 # For CORS allowed origins, you may need to set this manually.
 origins = [
-    "https://frontend-dot-davidassignment.nw.r.appspot.com"
+    FRONTEND_URL
 ]
 
 

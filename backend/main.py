@@ -1,12 +1,17 @@
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 import random
+import math
 import os
 from typing import Annotated, List
 from sqlmodel import Field, Session, SQLModel, create_engine, select, func
 from datetime import datetime
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+import time
+
+START_TIME = datetime.utcnow().isoformat()
 
 load_dotenv()
 # --- ENV ---
@@ -22,9 +27,6 @@ DB_PORT = os.getenv("DB_PORT", "3306")
 origins = [
     "https://frontend-dot-davidassignment.nw.r.appspot.com"
 ]
-
-
-
 
 
 # SQL Connection string
@@ -67,32 +69,38 @@ def on_startup():
     SQLModel.metadata.create_all(engine)
 
 # --- GENERATE ENDPOINT ---
-@app.get("/generate/")
+@app.post("/generate/")
 async def generate(
     session: SessionDep,
     batched: bool = False,
-    batch_size: int = 1,
+    batch_size: int = 0,
 ):
     ver = os.environ.get("GAE_VERSION", "v1")
     ins = os.environ.get("GAE_INSTANCE", "local")
-
+    
+ 
     response = {
         "numbers": [],
         "instance_id": ins,
         "version": ver,
+        "start_time" : START_TIME
     }
 
+    # Cause some random stress for CPU work
+    for _ in range(9999999):
+        math.sqrt(random.random() * 1000000)
+        
     if batched:
         entries = []
         for _ in range(batch_size):
             entry = Entry(
                 version=ver,
                 instance=ins,
-                number=random.randint(0, 10000)
+                number=random.randint(0, 100000)
             )
             entries.append(entry)
             response["numbers"].append(entry.number)
-
+        time.sleep(1)
         session.add_all(entries)
         session.commit()
 
@@ -102,6 +110,7 @@ async def generate(
             instance=ins,
             number=random.randint(0, 10000)
         )
+        time.sleep(1)
         session.add(entry)
         session.commit()
         session.refresh(entry)
@@ -120,12 +129,14 @@ async def results(session: SessionDep):
         "version": ver,
         "total": count,
         "minimum": mini,
-        "maximum": maxi
+        "maximum": maxi,
+        "start_time" : START_TIME
     } for inst, ver, count, mini, maxi in entries]
 
     smallest = session.exec(select(Entry.instance, Entry.number).order_by(Entry.number.asc())).first()
     biggest  = session.exec(select(Entry.instance, Entry.number).order_by(Entry.number.desc())).first()
 
+    print(f'Retrieving ${stats}')
     response = {
         "distribution": stats,
         "smallest": {"instance" : smallest[0], "number" : smallest[1]},

@@ -6,9 +6,6 @@ export default function Table() {
     const [stats, setStats] = useState(null);
 
     useEffect(() => {
-        const sendGenerateRequest = async () => {
-            await axios.get("/generate/");
-        };
 
         const getResults = async () => {
             const res = await axios.get("https://backend-dot-davidassignment.nw.r.appspot.com/results/");
@@ -20,7 +17,6 @@ export default function Table() {
             });
         };
 
-        sendGenerateRequest();
         getResults();
     }, []);
 
@@ -28,7 +24,7 @@ export default function Table() {
         if (!data || !stats) return null;
 
         return (
-            <table>
+            <table className={"results-table"}>
                 <thead>
                     <tr>
                         <td>Instance</td>
@@ -36,6 +32,7 @@ export default function Table() {
                         <td>Total Numbers</td>
                         <td>Largest Number</td>
                         <td>Smallest Number</td>
+                        <td>Start Time ISO</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,6 +43,7 @@ export default function Table() {
                             <td>{row.total}</td>
                             <td>{row.maximum}</td>
                             <td>{row.minimum}</td>
+                            <td>{row.start_time}</td>
                         </tr>
                     ))}
                 </tbody>

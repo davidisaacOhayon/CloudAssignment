@@ -6,6 +6,9 @@ import Table from './components/table';
 
 function App() {
 
+  // Retrieve backend URL from .env
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
   // Request Flag
   const [requested, setRequested] = useState(false);
 
@@ -43,7 +46,7 @@ function App() {
 
       // Send post request information to worker
       worker.postMessage({
-        url: "https://backend-dot-davidassignment.nw.r.appspot.com/generate/",
+        url: `${backendUrl}/generate/`,
         count: requestCount,
         batchSize: Math.floor(requestBatch / workerCount)
       });

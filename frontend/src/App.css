@@ -12,6 +12,18 @@
   align-items: center;
   gap: 20px;
 }
+.request-config{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 50%;
+
+}
+.config-input{
+  width: 50%;
+  height: 2vh;
+}
 .ui-btn{
   width: 120px;
   font-size: 1.2rem;
@@ -21,4 +33,10 @@
   border: 2px rgba(62, 62, 62, 0.578) solid;
   background-color: white;
   cursor: pointer;
+}
+.results-table td{
+  margin: 50px;
+}
+.results-table tr td {
+  text-align: center
 }

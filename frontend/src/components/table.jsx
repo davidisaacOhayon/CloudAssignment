@@ -1,54 +1,65 @@
 import axios from 'axios';
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
-
-
-
-
-export default function Table(){
-
-
-
+export default function Table() {
     const [data, setData] = useState(null);
+    const [stats, setStats] = useState(null);
 
-    useEffect(() => { 
+    useEffect(() => {
 
-        const loadData = async () => {
-            const res = await axios.get("/generate/?batched=true");
+        const getResults = async () => {
+            const res = await axios.get("https://backend-dot-davidassignment.nw.r.appspot.com/results/");
             const data = res.data;
+            setData(data.distribution);
+            setStats({
+                smallest: data.smallest,
+                biggest: data.biggest
+            });
+        };
 
-            setData(data);
-        }
-
-        loadData();
-    }, [])
-
+        getResults();
+    }, []);
 
     const renderData = () => {
-        return(
-            <table>
-                <th>
-                    <td>
-                        Instance Name
-                    </td>
-                    <td>
-                        Instance Version
-                    </td>
-                    <td>
-                        Numbers Generated
-                    </td>
-                    <td>
-                        Largest Number
-                    </td>
-                    <td>
-                        Smallest Number
-                    </td>
-                </th>
-            </table>
-        )
-    }
+        if (!data || !stats) return null;
 
-    return(
-        data && renderData()
-    )
+        return (
+            <table className={"results-table"}>
+                <thead>
+                    <tr>
+                        <td>Instance</td>
+                        <td>Version</td>
+                        <td>Total Numbers</td>
+                        <td>Largest Number</td>
+                        <td>Smallest Number</td>
+                        <td>Start Time ISO</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map((row, idx) => (
+                        <tr key={idx}>
+                            <td>{row.instance}</td>
+                            <td>{row.version}</td>
+                            <td>{row.total}</td>
+                            <td>{row.maximum}</td>
+                            <td>{row.minimum}</td>
+                            <td>{row.start_time}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
+    };
+
+    return (
+        <>
+            {stats && (
+                <div>
+                    <p>Global Largest: {stats.biggest.number} ({stats.biggest.instance})</p>
+                    <p>Global Smallest: {stats.smallest.number} ({stats.smallest.instance})</p>
+                </div>
+            )}
+            {data && renderData()}
+        </>
+    );
 }

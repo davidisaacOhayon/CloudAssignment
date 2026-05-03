@@ -2,22 +2,57 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 
 export default function Table() {
+    // Main Data from results endpoint
     const [data, setData] = useState(null);
+
+    // Skimmed data
     const [stats, setStats] = useState(null);
 
+    // Runs upon rendering
     useEffect(() => {
 
+        let fetching = false
+
+
         const getResults = async () => {
-            const res = await axios.get("https://backend-dot-davidassignment.nw.r.appspot.com/results/");
-            const data = res.data;
-            setData(data.distribution);
-            setStats({
-                smallest: data.smallest,
-                biggest: data.biggest
-            });
+            
+            // Used to prevent overlapping fetch requests
+            if (fetching) {
+                return; 
+            }
+            // Set currently fetching to true
+            fetching = true;
+            try {
+                // Send request for results
+                const res = await axios.get("https://backend-dot-davidassignment.nw.r.appspot.com/results/");
+
+                // Skim data
+                const data = res.data;
+
+                setData(data.distribution);
+
+                setStats({
+                    smallest: data.smallest,
+                    biggest: data.biggest
+                });
+            } catch (err) {
+                console.log(err);
+            } finally {
+                fetching = false;
+            }
+
         };
 
-        getResults();
+        // Send results request every 2 seconds
+        // This is to have persistant updates on the database on whats been
+        // generated
+        const interval = setInterval(
+            getResults
+        , 2000)
+
+        return () => clearInterval(interval);
+
+        
     }, []);
 
     const renderData = () => {

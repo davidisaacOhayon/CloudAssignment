@@ -1,30 +1,39 @@
  
-import { useState, Suspense} from 'react';
+import { useState, useEffect, Suspense} from 'react';
 import axios from 'axios';
 import './App.css';
 import Table from './components/table';
 
 function App() {
 
+  // Request Flag
   const [requested, setRequested] = useState(false);
 
+  // used to force results table re-rendering
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Total Number of requests (numbers)
   const [requestCount, setRequestCount] = useState(10000);
 
+  // Number of workers
   const [workerCount, setWorkerCount] = useState(10);
 
+  // Batch of requests for workers
   const [requestBatch, setRequestBatch] = useState(100);
 
 
+  // Generate Request
   const sendGenerateRequest = async () => {
     console.log("Sending multiple requests.")
+    // List of requests and workers
     let requests = [];
     let workers = [];
 
+    // Instantiate workers
     for (let i = 0; i < workerCount; i++) {
       const worker = new Worker(new URL('./components/worker.js', import.meta.url));
       
+      // Create promise with worker configuration
       const p = new Promise((resolve) => {
         worker.onmessage = (e) => {
           resolve(e.data);
@@ -32,18 +41,19 @@ function App() {
         };
       });
 
-
+      // Send post request information to worker
       worker.postMessage({
         url: "https://backend-dot-davidassignment.nw.r.appspot.com/generate/",
         count: requestCount,
         batchSize: Math.floor(requestBatch / workerCount)
       });
 
+      // Append workers and requests
       workers.push(worker);
       requests.push(p);
     }
-
-
+    
+    // Await all requests
     await Promise.all(requests);
  
   };
@@ -51,19 +61,6 @@ function App() {
   const onClickGenerate = async () => {
     await sendGenerateRequest();
   }
-
-  useEffect(() => {
-    if (!requested) {
-      return;
-    }
-    setRefreshKey(prev => prev + 1);
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 2000);
-    
-    return () => clearInterval(interval);
-
-  }, [requested])
 
   const displayResults = () => {
     setRequested(true);
@@ -73,10 +70,12 @@ function App() {
   }
 
   const automateConfig = (size) => {
+      // Automate config based on total requests (numbers) needed
       const requestsPerWorker = Math.floor(size / workerCount);
       setRequestCount(requestsPerWorker);
   }
  
+  // Used to render results table
   const renderTable = () => {
     return (
       <Suspense fallback={<h1>Loading</h1>}>
@@ -84,6 +83,8 @@ function App() {
       </Suspense>
     )
   }
+
+
   return (
     <section className={"main-content"}>
       <h2 style={{fontSize:"2rem"}}>Random Number Generation amongst services.</h2>
